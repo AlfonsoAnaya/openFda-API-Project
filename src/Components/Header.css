@@ -1,0 +1,7 @@
+header {
+    background-color: var(--clr-primary);
+    height: 100px;
+    color: var(--clr-white);
+    font-size: 24px;
+    font-weight: 800;
+}

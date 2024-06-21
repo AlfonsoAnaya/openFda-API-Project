@@ -1,0 +1,14 @@
+.table-container {
+    width: 100%;
+}
+
+@media screen and (min-width: 720px) {
+    .table-container {
+        width: 80% !important;
+    }
+}
+
+.icon-pagination {
+    font-size: 30px;
+    cursor: pointer;
+}
