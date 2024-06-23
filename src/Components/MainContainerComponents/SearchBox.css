@@ -1,0 +1,13 @@
+.search-container {
+    flex-direction: column !important;
+}
+
+.search-box {
+    width: 300px;
+}
+
+@media screen and (min-width: 720px) {
+    .search-container {
+        flex-direction: row !important;
+    }
+}

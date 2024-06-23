@@ -1,0 +1,32 @@
+.medication-container {
+    width: 95%;
+}
+
+@media screen and (min-width: 720px) {
+    .medication-container {
+        max-width: 800px !important;
+    }
+}
+
+h2 {
+    font-size: 28x;
+}
+
+.general-info {
+    gap: 10px;
+    margin: 20px 0 35px 0;
+}
+
+.general-info p {
+    font-size: 18px;
+}
+
+.accordion-info {
+    gap: 10px;
+    align-items: start !important;
+}
+
+.accordion-info p{
+    text-align: left;
+}
+

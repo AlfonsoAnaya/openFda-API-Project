@@ -1,5 +1,11 @@
-import { useState, useEffect } from 'react';
+//Components
 import PaginationController from './PaginationController';
+
+//Stores
+import useDataStore from '../../Zustand/DataStore';
+
+//React Router Link
+import { Link } from 'react-router-dom';
 
 //Material UI Table
 import Table from '@mui/material/Table';
@@ -14,28 +20,22 @@ import Paper from '@mui/material/Paper';
 import './DataDisplay.css';
 
 interface DataDisplayProps {
-    data: any
     skip: number
-    setSkip: any
-}
-
-interface DataElement {
-    package_label_principal_display_panel: string[][];
-    active_ingredient: string[][];
-    purpose: string[][];
-    id: number
 }
 
 function createDataPoint(
-    name: string[],
-    activeIngredient: string[],
-    purpose: string[],
+    name: string,
+    manufacturer: string,
+    classification: string,
     id: number
 ) {
-    return { name, activeIngredient, purpose, id };
+    return { name, manufacturer, classification, id };
 }
 
-export default function DataDisplay({ data, skip, setSkip }: DataDisplayProps) {
+export default function DataDisplay({ skip }: DataDisplayProps) {
+
+    //data state from store
+    const data = useDataStore((state) => state.data)
 
     if (data === null || typeof data !== 'object') {
         return <p>Results of your search will show up here</p>;
@@ -43,23 +43,36 @@ export default function DataDisplay({ data, skip, setSkip }: DataDisplayProps) {
 
     const skipSize = 50;
 
-    const dataPoints = data.results.map((element: DataElement) => createDataPoint(
-        element.package_label_principal_display_panel.length > 1
-            ? element.package_label_principal_display_panel[1]
-            : element.package_label_principal_display_panel[0],
-        element.active_ingredient[0],
-        element.purpose[0],
-        element.id
-    ));
-
+    const dataPoints = data.results.map((element: any) => {
+        let name:string = '';
+        let manufacturer:string = '';
+        let classification:string = '';
+        let id:number = 0;
+    
+        if (element.openfda.brand_name !== undefined) {
+            name = element.openfda.brand_name[0] || '';
+            manufacturer = element.openfda.manufacturer_name? element.openfda.manufacturer_name[0] : 'No manufacturer found';
+            classification = element.openfda.pharm_class_cs? element.openfda.pharm_class_cs[0] : 'No classification found';
+            id = element.id;
+        } else {
+            name = `Name not found. Purpose of medication: ${element.purpose}`
+            manufacturer = "No manufacturer found"
+            classification = "No classification found"
+            id = element.id;
+        }
+    
+        return createDataPoint(name, manufacturer, classification, id);
+    });
+    
     const totalDataPoints = data.meta.results.total;
+
+    if (totalDataPoints.length === 0) return <p>Your search yielded no results. Try using a different query.</p>
 
     return (
         <div>
             {/* Pagination Controller */}
             <PaginationController
                 skip={skip}
-                setSkip={setSkip}
                 totalDataPoints={totalDataPoints}
                 skipSize={skipSize}
             />
@@ -71,22 +84,35 @@ export default function DataDisplay({ data, skip, setSkip }: DataDisplayProps) {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Medicine Name</TableCell>
-                                <TableCell align="right">Active Ingredient</TableCell>
-                                <TableCell align="right">Purpose</TableCell>
+                                <TableCell align="right">Manufacturer</TableCell>
+                                <TableCell align="right">Classification</TableCell>
+                                <TableCell align="right">More Information</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {dataPoints.map((row: any) => (
                                 <TableRow
                                     key={row.id}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    sx={{
+                                        '&:last-child td, &:last-child th': { border: 0 },
+                                        textDecoration: 'none', // Remove default link styling
+                                        color: 'inherit', // Inherit text color
+                                    }}
                                 >
                                     <TableCell component="th" scope="row">
                                         {row.name}
                                     </TableCell>
-                                    <TableCell align="right">{row.activeIngredient}</TableCell>
-                                    <TableCell align="right">{row.purpose}</TableCell>
-
+                                    <TableCell align="right">{row.manufacturer}</TableCell>
+                                    <TableCell align="right">{row.classification}</TableCell>
+                                    <TableCell align="right">
+                                    <Link 
+                                        className="link"
+                                        to={`/item/${row.id}`} 
+                                        state={{ id: row.id }}
+                                    >
+                                        See More
+                                    </Link>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -97,7 +123,6 @@ export default function DataDisplay({ data, skip, setSkip }: DataDisplayProps) {
             {/* Pagination Controller */}
             <PaginationController
                 skip={skip}
-                setSkip={setSkip}
                 totalDataPoints={totalDataPoints}
                 skipSize={skipSize}
             />

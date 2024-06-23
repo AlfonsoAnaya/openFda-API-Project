@@ -1,0 +1,5 @@
+.pagination-controller {
+    margin: 10px auto;
+    max-width: 80%;
+    justify-content: end !important;
+}

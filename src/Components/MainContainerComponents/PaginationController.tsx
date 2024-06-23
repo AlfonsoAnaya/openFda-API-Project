@@ -3,54 +3,51 @@ import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardDoubleArrowLeft } from "react-icons/md";
 import { MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
+//CSS
+import './PaginationController.css'
+
+//Zustand store
+import useSkipStore from "../../Zustand/SkipStores";
 
 interface PaginationControllerProps {
     skip: number
-    setSkip: any
     totalDataPoints: number
     skipSize: number
 }
 
-export default function PaginationController({ skip, setSkip, totalDataPoints, skipSize }: PaginationControllerProps) {
+export default function PaginationController({ skip, totalDataPoints, skipSize }: PaginationControllerProps) {
+
+    const updateSkip = useSkipStore((state) => state.updateSkip)
 
     function nextPage() {
-        setSkip((prev: number) => {
-            // Calculate the potential new skip value
-            const newSkip = prev + skipSize;
-
-            // Check if the new skip value is within the range
-            if (newSkip >= totalDataPoints) {
-                // Prevent increment if it exceeds the total data points
-                return prev;
-            }
-            return newSkip;
-        });
-    }
+        const newSkip = skip + skipSize;
+    
+        if (newSkip >= totalDataPoints) {
+          return;
+        }
+    
+        updateSkip(newSkip);
+      }
 
     function prevPage() {
-        setSkip((prev: number) => {
-            // Calculate the potential new skip value
-            const newSkip = prev - skipSize;
-            // Prevent decrement if it would go below 0
-            if (newSkip < 0) {
-                return 0;
-            }
-            return newSkip;
-        });
+        let newSkip = skip - skipSize;
+        if (newSkip < 0) {
+            newSkip = 0;
+        }
+        updateSkip(newSkip) ;
     }
 
     function finalPage() {
-        setSkip(() => {
-            return Math.floor(totalDataPoints / skipSize) * skipSize
-        })
+        const newSkip = Math.floor(totalDataPoints / skipSize) * skipSize
+        updateSkip(newSkip)
     }
 
     function firstPage() {
-        setSkip(0);
+        updateSkip(0);
     }
 
     return (
-        <div className="flex-row">
+        <div className="flex-row pagination-controller">
             <span>{skip + 1} - {skip + 50 > totalDataPoints ? totalDataPoints : skip + 50} of {totalDataPoints}</span>
             <MdOutlineKeyboardDoubleArrowLeft
                 onClick={firstPage}
